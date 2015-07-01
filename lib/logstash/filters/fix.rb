@@ -28,7 +28,8 @@ class LogStash::Filters::Fix < LogStash::Filters::Base
 
   public
   def register
-    require "xmlsimple"
+    require 'xmlsimple'
+    require 'nokogiri'
     @dd40 = quickfix.DataDictionary.new(quickfix.DataDictionary.java_class.resource_as_stream('/FIX40.xml'))
     @dd41 = quickfix.DataDictionary.new(quickfix.DataDictionary.java_class.resource_as_stream('/FIX41.xml'))
     @dd42 = quickfix.DataDictionary.new(quickfix.DataDictionary.java_class.resource_as_stream('/FIX42.xml'))
@@ -37,6 +38,19 @@ class LogStash::Filters::Fix < LogStash::Filters::Base
     @dd50 = quickfix.DataDictionary.new(quickfix.DataDictionary.java_class.resource_as_stream('/FIX50.xml'))
     @dd50SP1 = quickfix.DataDictionary.new(quickfix.DataDictionary.java_class.resource_as_stream('/FIX50SP1.xml'))
     @dd50SP2 = quickfix.DataDictionary.new(quickfix.DataDictionary.java_class.resource_as_stream('/FIX50SP2.xml'))
+
+    @template = Nokogiri::XSLT <<-eos
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0"
+xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:template match="@*|node()">
+    <xsl:copy>
+        <xsl:apply-templates select="@*|node()" />
+    </xsl:copy>
+</xsl:template>
+</xsl:stylesheet>
+    eos
+
   end # def register
 
   public
@@ -87,7 +101,8 @@ class LogStash::Filters::Fix < LogStash::Filters::Base
         else
           parsedXml = parsedMsg.toXML(dd)
         end
-        event[@target] = XmlSimple.xml_in(parsedXml)
+        doc = @template.transform(doc = Nokogiri::XML(parsedXml, nil, parsedXml.encoding.to_s))
+        event[@target] = XmlSimple.xml_in(doc.to_s)
 
         matched = true
       rescue => e

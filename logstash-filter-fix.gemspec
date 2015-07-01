@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "logstash-core", '>= 1.4.0', '< 2.0.0'
   s.add_runtime_dependency "quickfix-jruby", '1.6.0'
   s.add_runtime_dependency 'xml-simple'
+  s.add_runtime_dependency 'nokogiri'
   s.add_development_dependency 'logstash-devutils'
 
   # Jar dependencies
