@@ -1,8 +1,6 @@
-# Logstash Plugin
+# Logstash Filter FIX Plugin
 
-This is a plugin for [Logstash](https://github.com/elasticsearch/logstash).
-
-It is fully free and fully open source. The license is Apache 2.0, meaning you are pretty much free to use it however you want in whatever way.
+This is a filter plugin for [Logstash](https://github.com/elasticsearch/logstash) for parsing [FIX](http://www.fixtradingcommunity.org/pg/main/what-is-fix) messages.
 
 ## Documentation
 
@@ -11,18 +9,12 @@ Logstash provides infrastructure to automatically generate documentation for thi
 - For formatting code or config example, you can use the asciidoc `[source,ruby]` directive
 - For more asciidoc formatting tips, see the excellent reference here https://github.com/elasticsearch/docs#asciidoc-guide
 
-## Need Help?
-
-Need help? Try #logstash on freenode IRC or the https://discuss.elastic.co/c/logstash discussion forum.
-
 ## Developing
 
 ### 1. Plugin Developement and Testing
 
 #### Code
 - To get started, you'll need JRuby with the Bundler gem installed.
-
-- Create a new plugin or clone and existing from the GitHub [logstash-plugins](https://github.com/logstash-plugins) organization. We also provide [example plugins](https://github.com/logstash-plugins?query=example).
 
 - Install dependencies
 ```sh
@@ -84,3 +76,7 @@ Programming is not a required skill. Whatever you've seen about open source and 
 It is more important to the community that you are able to contribute.
 
 For more information about contributing, see the [CONTRIBUTING](https://github.com/elasticsearch/logstash/blob/master/CONTRIBUTING.md) file.
+
+## QuickFix
+
+This product includes software developed by [quickfixengine.org](http://www.quickfixengine.org/).
