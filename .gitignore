@@ -3,3 +3,7 @@ Gemfile.lock
 Gemfile.bak
 .bundle
 vendor
+
+.idea/**
+
+logstash-filter-fix.iml
