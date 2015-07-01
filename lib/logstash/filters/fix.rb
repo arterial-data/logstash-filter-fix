@@ -57,40 +57,47 @@ class LogStash::Filters::Fix < LogStash::Filters::Base
 
     return if value.strip.length == 0
 
-    begin
-      version = quickfix.MessageUtils.getStringField(event[@source], 8);
-      parsedMsg = quickfix.Message.new(event[@source])
-      case version
-        when "FIX.4.0"
-          event[@target] = parsedMsg.toXML(@dd40)
-        when "FIX.4.1"
-          event[@target] = parsedMsg.toXML(@dd41)
-        when "FIX.4.2"
-          event[@target] = parsedMsg.toXML(@dd42)
-        when "FIX.4.3"
-          event[@target] = parsedMsg.toXML(@dd43)
-        when "FIX.4.4"
-          event[@target] = parsedMsg.toXML(@dd44)
-        when "FIX.5.0"
-          event[@target] = parsedMsg.toXML(@dd50)
-        when "FIX.5.0SP1"
-          event[@target] = parsedMsg.toXML(@dd50SP1)
-        when "FIX.5.0SP2"
-          event[@target] = parsedMsg.toXML(@dd50SP2)
+    if @target
+      begin
+        version = quickfix.MessageUtils.getStringField(event[@source], 8);
+        parsedMsg = quickfix.Message.new(event[@source])
+
+        case version
+          when "FIX.4.0"
+            dd = @dd40
+          when "FIX.4.1"
+            dd = @dd41
+          when "FIX.4.2"
+            dd = @dd42
+          when "FIX.4.3"
+            dd = @dd43
+          when "FIX.4.4"
+            dd = @dd44
+          when "FIX.5.0"
+            dd = @dd50
+          when "FIX.5.0SP1"
+            dd = @dd50SP1
+          when "FIX.5.0SP2"
+            dd = @dd50SP2
+          else
+            dd = nil
+        end
+        if dd.nil?
+          parsedXml = parsedMsg.toXML()
         else
-          event[@target] = parsedMsg.toXML()
+          parsedXml = parsedMsg.toXML(dd)
+        end
+        event[@target] = XmlSimple.xml_in(parsedXml)
+
+        matched = true
+      rescue => e
+        event.tag("_fixparsefailure")
+        puts e
+        @logger.warn("Trouble parsing FIX with quickfix", :source => @source,
+                     :value => value, :exception => e, :backtrace => e.backtrace)
+        return
       end
-
-      matched = true
-    rescue => e
-      event.tag("_fixparsefailure")
-      puts "Trouble parsing FIX with quickfix"
-      puts e
-
-      #event["error"] = [:err => "Trouble parsing FIX with quickfix", :source => @source,
-      #             :value => value, :exception => e, :backtrace => e.backtrace]
-      return
-    end if @target # if @store_xml
+    end # if @store_xml
 
 
     filter_matched(event) if matched
