@@ -125,4 +125,23 @@ describe LogStash::Filters::Fix do
       expect(subject['fixMessage']).to eq({ "header" => [{ "field" => [{ "name" => "BeginString", "tag" => "8", "content" => "FIX.4.1" }, { "name" => "BodyLength", "tag" => "9", "content" => "82" }, { "name" => "MsgSeqNum", "tag" => "34", "content" => "9" }, { "enum" => "Reject", "name" => "MsgType", "tag" => "35", "content" => "3" }, { "name" => "SenderCompID", "tag" => "49", "content" => "EXEC" }, { "name" => "SendingTime", "tag" => "52", "content" => "20121105-23:25:25" }, { "name" => "TargetCompID", "tag" => "56", "content" => "BANZAI" }] }], "body" => [{ "field" => [{ "name" => "RefSeqNum", "tag" => "45", "content" => "7" }, { "name" => "Text", "tag" => "58", "content" => "Unsupported message type" }] }], "trailer" => [{ "field" => [{ "name" => "CheckSum", "tag" => "10", "content" => "002" }] }] })
     end
   end
+
+  describe "Parse FIX Message with different source and target" do
+    let(:config) do
+      <<-CONFIG
+      filter {
+        fix {
+          source => "fix"
+          target => "parsedFix"
+        }
+      }
+      CONFIG
+    end
+
+    sample("fix" => "8=FIX.4.39=24335=D49=UKBANK31=B3999999956=HELIXsysTrading34=20150429-0000152=20150429-06:51:3611=bceacad4-f2dc-4e79-bafb-ca1b74b8110a63=021=2110=15000111=15800044=34.8038=7900055=BA.L48=0002634922=154=140=115=USD59=060=20150429-06:51:3610=248") do
+      expect(subject).to include("fix")
+      expect(subject).to include("parsedFix")
+      expect(subject['parsedFix']).to eq({ "header" => [{ "field" => [{ "name" => "BeginString", "tag" => "8", "content" => "FIX.4.3" }, { "name" => "BodyLength", "tag" => "9", "content" => "243" }, { "name" => "MsgSeqNum", "tag" => "34", "content" => "20150429-00001" }, { "enum" => "NewOrderSingle", "name" => "MsgType", "tag" => "35", "content" => "D" }, { "name" => "SenderCompID", "tag" => "49", "content" => "UKBANK3" }, { "name" => "SendingTime", "tag" => "52", "content" => "20150429-06:51:36" }, { "name" => "TargetCompID", "tag" => "56", "content" => "HELIXsysTrading" }] }], "body" => [{ "field" => [{ "name" => "Account", "tag" => "1", "content" => "B39999999" }, { "name" => "ClOrdID", "tag" => "11", "content" => "bceacad4-f2dc-4e79-bafb-ca1b74b8110a" }, { "name" => "Currency", "tag" => "15", "content" => "USD" }, { "enum" => "AUTOMATED_EXECUTION_ORDER_PUBLIC", "name" => "HandlInst", "tag" => "21", "content" => "2" }, { "enum" => "CUSIP", "name" => "SecurityIDSource", "tag" => "22", "content" => "1" }, { "name" => "OrderQty", "tag" => "38", "content" => "79000" }, { "enum" => "MARKET", "name" => "OrdType", "tag" => "40", "content" => "1" }, { "name" => "Price", "tag" => "44", "content" => "34.80" }, { "name" => "SecurityID", "tag" => "48", "content" => "00026349" }, { "enum" => "BUY", "name" => "Side", "tag" => "54", "content" => "1" }, { "name" => "Symbol", "tag" => "55", "content" => "BA.L" }, { "enum" => "DAY", "name" => "TimeInForce", "tag" => "59", "content" => "0" }, { "name" => "TransactTime", "tag" => "60", "content" => "20150429-06:51:36" }, { "enum" => "REGULAR", "name" => "SettlmntTyp", "tag" => "63", "content" => "0" }, { "name" => "MinQty", "tag" => "110", "content" => "15000" }, { "name" => "MaxFloor", "tag" => "111", "content" => "158000" }] }], "trailer" => [{ "field" => [{ "name" => "CheckSum", "tag" => "10", "content" => "248" }] }] })
+    end
+  end
 end
