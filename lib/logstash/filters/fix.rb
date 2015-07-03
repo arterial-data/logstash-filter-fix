@@ -4,22 +4,8 @@ require "logstash/namespace"
 require 'quickfix'
 require 'java'
 
-
-# This example filter will replace the contents of the default 
-# message field with whatever you specify in the configuration.
-#
-# It is only intended to be used as an example.
 class LogStash::Filters::Fix < LogStash::Filters::Base
 
-  # Setting the config_name here is required. This is how you
-  # configure this filter from your Logstash config.
-  #
-  # filter {
-  #   example {
-  #     message => "My message..."
-  #   }
-  # }
-  #
   config_name "fix"
   
   config :source, :validate => :string, :required => true
@@ -30,6 +16,8 @@ class LogStash::Filters::Fix < LogStash::Filters::Base
   def register
     require 'xmlsimple'
     require 'nokogiri'
+    require 'nori'
+
     @dd40 = quickfix.DataDictionary.new(quickfix.DataDictionary.java_class.resource_as_stream('/FIX40.xml'))
     @dd41 = quickfix.DataDictionary.new(quickfix.DataDictionary.java_class.resource_as_stream('/FIX41.xml'))
     @dd42 = quickfix.DataDictionary.new(quickfix.DataDictionary.java_class.resource_as_stream('/FIX42.xml'))
@@ -43,15 +31,38 @@ class LogStash::Filters::Fix < LogStash::Filters::Base
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-<xsl:template match="@*|node()">
-    <xsl:copy>
-        <xsl:apply-templates select="@*|node()" />
-    </xsl:copy>
-</xsl:template>
+
+  <xsl:template match="@*|node()">
+      <xsl:copy>
+          <xsl:apply-templates select="@*|node()" />
+      </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="field">
+
+    <xsl:variable name="elementName">
+      <xsl:choose>
+        <xsl:when test="count(@name)=1">
+          <xsl:value-of select="@name"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="@tag"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+
+    <xsl:element name="{$elementName}">
+      <xsl:apply-templates select="(@*|*)[name() != 'name']" />
+      <xsl:element name="value">
+        <xsl:value-of select="text()"/>
+      </xsl:element>
+    </xsl:element>
+  </xsl:template>
 </xsl:stylesheet>
     eos
 
   end # def register
+
 
   public
   def filter(event)
@@ -102,12 +113,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           parsedXml = parsedMsg.toXML(dd)
         end
         doc = @template.transform(doc = Nokogiri::XML(parsedXml, nil, parsedXml.encoding.to_s))
-        event[@target] = XmlSimple.xml_in(doc.to_s)
+
+        event[@target] = Nori.new.parse(doc.to_s)["message"]
 
         matched = true
       rescue => e
         event.tag("_fixparsefailure")
-        puts e
         @logger.warn("Trouble parsing FIX with quickfix", :source => @source,
                      :value => value, :exception => e, :backtrace => e.backtrace)
         return
