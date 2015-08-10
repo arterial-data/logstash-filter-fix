@@ -145,7 +145,37 @@ describe LogStash::Filters::Fix do
     sample("fix" => "8=FIX.4.39=24335=D49=UKBANK31=B3999999956=HELIXsysTrading34=20150429-0000152=20150429-06:51:3611=bceacad4-f2dc-4e79-bafb-ca1b74b8110a63=021=2110=15000111=15800044=34.8038=7900055=BA.L48=0002634922=154=140=115=USD59=060=20150429-06:51:3610=248") do
       expect(subject).to include("fix")
       expect(subject).to include("parsedFix")
-      expect(subject['parsedFix']).to eq({ "header" => { "BeginString" => { "value" => "FIX.4.3", "@tag" => "8" }, "BodyLength" => { "value" => "243", "@tag" => "9" }, "MsgSeqNum" => { "value" => "20150429-00001", "@tag" => "34" }, "MsgType" => { "value" => "D", "@enum" => "NewOrderSingle", "@tag" => "35" }, "SenderCompID" => { "value" => "UKBANK3", "@tag" => "49" }, "SendingTime" => { "value" => "20150429-06:51:36", "@tag" => "52" }, "TargetCompID" => { "value" => "HELIXsysTrading", "@tag" => "56" } }, "body" => { "Account" => { "value" => "B39999999", "@tag" => "1" }, "ClOrdID" => { "value" => "bceacad4-f2dc-4e79-bafb-ca1b74b8110a", "@tag" => "11" }, "Currency" => { "value" => "USD", "@tag" => "15" }, "HandlInst" => { "value" => "2", "@enum" => "AUTOMATED_EXECUTION_ORDER_PUBLIC", "@tag" => "21" }, "SecurityIDSource" => { "value" => "1", "@enum" => "CUSIP", "@tag" => "22" }, "OrderQty" => { "value" => "79000", "@tag" => "38" }, "OrdType" => { "value" => "1", "@enum" => "MARKET", "@tag" => "40" }, "Price" => { "value" => "34.80", "@tag" => "44" }, "SecurityID" => { "value" => "00026349", "@tag" => "48" }, "Side" => { "value" => "1", "@enum" => "BUY", "@tag" => "54" }, "Symbol" => { "value" => "BA.L", "@tag" => "55" }, "TimeInForce" => { "value" => "0", "@enum" => "DAY", "@tag" => "59" }, "TransactTime" => { "value" => "20150429-06:51:36", "@tag" => "60" }, "SettlmntTyp" => { "value" => "0", "@enum" => "REGULAR", "@tag" => "63" }, "MinQty" => { "value" => "15000", "@tag" => "110" }, "MaxFloor" => { "value" => "158000", "@tag" => "111" } }, "trailer" => { "CheckSum" => { "value" => "248", "@tag" => "10" } } })
+      expect(subject['parsedFix']).to eq({
+                                             "header" => {
+                                                 "BeginString" => { "value" => "FIX.4.3", "@tag" => "8" },
+                                                 "BodyLength" => { "value" => "243", "@tag" => "9" },
+                                                 "MsgSeqNum" => { "value" => "20150429-00001", "@tag" => "34" },
+                                                 "MsgType" => { "value" => "D", "@enum" => "NewOrderSingle", "@tag" => "35" },
+                                                 "SenderCompID" => { "value" => "UKBANK3", "@tag" => "49" },
+                                                 "SendingTime" => { "value" => "20150429-06:51:36", "@tag" => "52" },
+                                                 "TargetCompID" => { "value" => "HELIXsysTrading", "@tag" => "56" } },
+                                             "body" => {
+                                                 "Account" => { "value" => "B39999999", "@tag" => "1" },
+                                                 "ClOrdID" => { "value" => "bceacad4-f2dc-4e79-bafb-ca1b74b8110a", "@tag" => "11" },
+                                                 "Currency" => { "value" => "USD", "@tag" => "15" },
+                                                 "HandlInst" => { "value" => "2", "@enum" => "AUTOMATED_EXECUTION_ORDER_PUBLIC", "@tag" => "21" },
+                                                 "SecurityIDSource" => { "value" => "1", "@enum" => "CUSIP", "@tag" => "22" },
+                                                 "OrderQty" => { "value" => "79000", "@tag" => "38" },
+                                                 "OrdType" => { "value" => "1", "@enum" => "MARKET", "@tag" => "40" },
+                                                 "Price" => { "value" => "34.80", "@tag" => "44" },
+                                                 "SecurityID" => { "value" => "00026349", "@tag" => "48" },
+                                                 "Side" => { "value" => "1", "@enum" => "BUY", "@tag" => "54" },
+                                                 "Symbol" => { "value" => "BA.L", "@tag" => "55" },
+                                                 "TimeInForce" => { "value" => "0", "@enum" => "DAY", "@tag" => "59" },
+                                                 "TransactTime" => { "value" => "20150429-06:51:36", "@tag" => "60" },
+                                                 "SettlmntTyp" => { "value" => "0", "@enum" => "REGULAR", "@tag" => "63" },
+                                                 "MinQty" => { "value" => "15000", "@tag" => "110" },
+                                                 "MaxFloor" => { "value" => "158000", "@tag" => "111" } },
+                                             "trailer" => {
+                                                 "CheckSum" => { "value" => "248", "@tag" => "10" }
+                                             }
+                                         })
     end
   end
 end
+
